@@ -10,42 +10,46 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
         
         Diagnostics.remark("current directory \(context.pluginWorkDirectoryURL.absoluteString)")
         
-        let url = URL(fileURLWithPath: target.directory.string, isDirectory: true).deletingLastPathComponent().deletingLastPathComponent()
+        let cssDirectory = URL(fileURLWithPath: target.directory.string, isDirectory: true)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appending(component: "Public")
+            .appending(path: "css")
         
-        Diagnostics.remark("url: " + url.absoluteString)
+        let fileURLs = try cssFileURLs(directory: cssDirectory)
         
-//        let items = try FileManager.default.contentsOfDirectory(atPath: target.directory.string)
-        let items = try FileManager.default.contentsOfDirectory(at: url.appending(component: "Public").appending(path: "css"), includingPropertiesForKeys: [])
-        
-        Diagnostics.remark("items in the current directory \(items.count)")
-        for item in items {
-            Diagnostics.remark("item: \(item)")
+        Diagnostics.remark("css file urls \(fileURLs.count)")
+        for fileURL in fileURLs {
+            Diagnostics.remark("url: \(fileURL.absoluteString)")
         }
         
-//        let inputFiles = target.sourceFiles.filter({
-//            
-//            Diagnostics.remark("path extension \($0.url.pathExtension)")
-//            return $0.url.pathExtension == ".css"
-//        })
-//        
-//        guard !inputFiles.isEmpty else {
-//            Diagnostics.remark("No css files found")
-//            return []
-//        }
+        let outputFilePath = target.directory.appending(subpath: "HTMLTagClass.swift").string
         
-//        let inputFilePaths = inputFiles.map({ $0.url.absoluteString }).joined(separator: " ")
-        let outputFilePath = context.pluginWorkDirectoryURL.appending(component: "HTMLTagClass.swift").absoluteString
-        
-//        return [.prebuildCommand(displayName: "Generating the HTML tag classes...",
-//                                 executable: try context.tool(named: "htmltagclass-generator").url,
-//                                 arguments: [" ", "--outputFile \(outputFilePath)"],
-//                                 environment: [:],
-//                                 outputFilesDirectory: context.pluginWorkDirectoryURL)]
         return [.buildCommand(displayName: "Generating the HTML tag classes...",
                               executable: try context.tool(named: "htmltagclass-generator").url,
-                              arguments: [" ", "--outputFile \(outputFilePath)"],
+                              arguments: fileURLs.map(\.absoluteString) + ["--outputFile \(outputFilePath)"],
                               environment: [:],
-                              inputFiles: [],//inputFiles.map(\.url),
-                              outputFiles: [context.pluginWorkDirectoryURL.appending(component: "HTMLTagClass.swift")])]
+                              inputFiles: fileURLs,
+                              outputFiles: [URL(filePath: outputFilePath)])]
+    }
+    
+    private func cssFileURLs(directory: URL) throws -> [URL] {
+        
+        let items = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.isDirectoryKey])
+        
+        var files = [URL]()
+        
+        for item in items {
+            if try item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory ?? false {
+                files += try cssFileURLs(directory: item)
+            } else {
+                Diagnostics.remark("Checking file \(item.absoluteString) \(item.pathExtension)")
+                if item.pathExtension == "css" {
+                    files += [item]
+                }
+            }
+        }
+        
+        return files
     }
 }
