@@ -5,12 +5,16 @@ import Foundation
 struct HTMLTagClassPlugin: BuildToolPlugin {
     
     func createBuildCommands(context: PackagePlugin.PluginContext, target: any PackagePlugin.Target) async throws -> [PackagePlugin.Command] {
-        Diagnostics.progress("HTMLTagClassGenerator starting")
+        Diagnostics.remark("HTMLTagClassGenerator starting")
         guard let target = target.sourceModule else { return [] }
-        let inputFiles = target.sourceFiles.filter({ $0.url.pathExtension == "css" })
+        
+        let inputFiles = target.sourceFiles.filter({
+            Diagnostics.remark("path extension \($0.url.pathExtension)")
+            return $0.url.pathExtension == ".css"
+        })
         
         guard !inputFiles.isEmpty else {
-            Diagnostics.progress("No css files found")
+            Diagnostics.remark("No css files found")
             return []
         }
         
