@@ -24,10 +24,10 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
         }
         
         let outputFilePath = target.directory.appending(subpath: "HTMLTagClass.swift").string
-        
+                
         return [.buildCommand(displayName: "Generating the HTML tag classes...",
                               executable: try context.tool(named: "htmltagclass-generator").url,
-                              arguments: fileURLs.map({ #""\#($0.path())""# }) + ["--output-file \(outputFilePath)"],
+                              arguments: fileURLs.map({ $0.path() }) + ["--output-file", outputFilePath],
                               environment: [:],
                               inputFiles: fileURLs,
                               outputFiles: [URL(filePath: outputFilePath)])]
