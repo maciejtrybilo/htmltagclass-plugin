@@ -6,11 +6,12 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
     
     func createBuildCommands(context: PackagePlugin.PluginContext, target: any PackagePlugin.Target) async throws -> [PackagePlugin.Command] {
         Diagnostics.remark("HTMLTagClassGenerator starting")
-//        guard let target = target.sourceModule else { return [] }
+        guard let target = target.sourceModule else { return [] }
         
         Diagnostics.remark("current directory \(context.pluginWorkDirectoryURL.absoluteString)")
         
-        let items = try FileManager.default.contentsOfDirectory(at: context.pluginWorkDirectoryURL, includingPropertiesForKeys: [])
+        let items = try FileManager.default.contentsOfDirectory(atPath: target.directory.string)
+//        let items = try FileManager.default.contentsOfDirectory(at: target.directory, includingPropertiesForKeys: [])
         
         Diagnostics.remark("items in the current directory \(items.count)")
         for item in items {
