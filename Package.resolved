@@ -1,0 +1,24 @@
+{
+  "originHash" : "b74798dbbe31a108bcffd567f55ee9eed39e70683b0fc93854c3e3bfa953c55c",
+  "pins" : [
+    {
+      "identity" : "htmltagclass-generator",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/maciejtrybilo/htmltagclass-generator",
+      "state" : {
+        "branch" : "main",
+        "revision" : "7e5fc22e0c17c3ea8554670be34ad95764c628a5"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "41982a3656a71c768319979febd796c6fd111d5c",
+        "version" : "1.5.0"
+      }
+    }
+  ],
+  "version" : 3
+}
