@@ -9,6 +9,11 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
         guard let target = target.sourceModule else { return [] }
         let inputFiles = target.sourceFiles.filter({ $0.url.pathExtension == "css" })
         
+        guard !inputFiles.isEmpty else {
+            Diagnostics.progress("No css files found")
+            return []
+        }
+        
         let inputFilePaths = inputFiles.map({ $0.url.absoluteString }).joined(separator: " ")
         let outputFilePath = context.pluginWorkDirectoryURL.appending(component: "HTMLTagClass.swift").absoluteString
         
