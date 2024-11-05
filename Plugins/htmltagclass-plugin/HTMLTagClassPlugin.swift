@@ -20,14 +20,14 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
         
         Diagnostics.remark("css file urls \(fileURLs.count)")
         for fileURL in fileURLs {
-            Diagnostics.remark("url: \(fileURL.absoluteString)")
+            Diagnostics.remark("url: \(fileURL.path())")
         }
         
         let outputFilePath = target.directory.appending(subpath: "HTMLTagClass.swift").string
         
         return [.buildCommand(displayName: "Generating the HTML tag classes...",
                               executable: try context.tool(named: "htmltagclass-generator").url,
-                              arguments: fileURLs.map(\.absoluteString) + ["--output-file \(outputFilePath)"],
+                              arguments: fileURLs.map({ #""\#($0.path())""# }) + ["--output-file \(outputFilePath)"],
                               environment: [:],
                               inputFiles: fileURLs,
                               outputFiles: [URL(filePath: outputFilePath)])]
