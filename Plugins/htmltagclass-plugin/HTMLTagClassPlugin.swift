@@ -28,16 +28,16 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
 //        let inputFilePaths = inputFiles.map({ $0.url.absoluteString }).joined(separator: " ")
         let outputFilePath = context.pluginWorkDirectoryURL.appending(component: "HTMLTagClass.swift").absoluteString
         
-        return [.prebuildCommand(displayName: "Generating the HTML tag classes...",
-                                 executable: try context.tool(named: "htmltagclass-generator").url,
-                                 arguments: [" ", "--outputFile \(outputFilePath)"],
-                                 environment: [:],
-                                 outputFilesDirectory: context.pluginWorkDirectoryURL)]
-//        return [.buildCommand(displayName: "Generating the HTML tag classes...",
-//                              executable: try context.tool(named: "htmltagclass-generator").url,
-//                              arguments: [inputFilePaths, "--outputFile \(outputFilePath)"],
-//                              environment: [:],
-//                              inputFiles: inputFiles.map(\.url),
-//                              outputFiles: [context.pluginWorkDirectoryURL.appending(component: "HTMLTagClass.swift")])]
+//        return [.prebuildCommand(displayName: "Generating the HTML tag classes...",
+//                                 executable: try context.tool(named: "htmltagclass-generator").url,
+//                                 arguments: [" ", "--outputFile \(outputFilePath)"],
+//                                 environment: [:],
+//                                 outputFilesDirectory: context.pluginWorkDirectoryURL)]
+        return [.buildCommand(displayName: "Generating the HTML tag classes...",
+                              executable: try context.tool(named: "htmltagclass-generator").url,
+                              arguments: [" ", "--outputFile \(outputFilePath)"],
+                              environment: [:],
+                              inputFiles: [],//inputFiles.map(\.url),
+                              outputFiles: [context.pluginWorkDirectoryURL.appending(component: "HTMLTagClass.swift")])]
     }
 }
