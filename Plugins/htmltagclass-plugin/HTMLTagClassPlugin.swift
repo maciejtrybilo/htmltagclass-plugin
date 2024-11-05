@@ -10,8 +10,12 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
         
         Diagnostics.remark("current directory \(context.pluginWorkDirectoryURL.absoluteString)")
         
-        let items = try FileManager.default.contentsOfDirectory(atPath: target.directory.string)
-//        let items = try FileManager.default.contentsOfDirectory(at: target.directory, includingPropertiesForKeys: [])
+        let url = URL(fileURLWithPath: target.directory.string, isDirectory: true).deletingLastPathComponent().deletingLastPathComponent()
+        
+        Diagnostics.remark("url: " + url.absoluteString)
+        
+//        let items = try FileManager.default.contentsOfDirectory(atPath: target.directory.string)
+        let items = try FileManager.default.contentsOfDirectory(at: url.appending(component: "Public").appending(path: "css"), includingPropertiesForKeys: [])
         
         Diagnostics.remark("items in the current directory \(items.count)")
         for item in items {
