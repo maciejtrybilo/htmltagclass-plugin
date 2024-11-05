@@ -8,24 +8,36 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
         Diagnostics.remark("HTMLTagClassGenerator starting")
         guard let target = target.sourceModule else { return [] }
         
-        let inputFiles = target.sourceFiles.filter({
-            Diagnostics.remark("path extension \($0.url.pathExtension)")
-            return $0.url.pathExtension == ".css"
-        })
+        let items = try FileManager.default.contentsOfDirectory(at: context.pluginWorkDirectoryURL, includingPropertiesForKeys: [])
         
-        guard !inputFiles.isEmpty else {
-            Diagnostics.remark("No css files found")
-            return []
+        for item in items {
+            Diagnostics.remark("item: \(item)")
         }
         
-        let inputFilePaths = inputFiles.map({ $0.url.absoluteString }).joined(separator: " ")
+//        let inputFiles = target.sourceFiles.filter({
+//            
+//            Diagnostics.remark("path extension \($0.url.pathExtension)")
+//            return $0.url.pathExtension == ".css"
+//        })
+//        
+//        guard !inputFiles.isEmpty else {
+//            Diagnostics.remark("No css files found")
+//            return []
+//        }
+        
+//        let inputFilePaths = inputFiles.map({ $0.url.absoluteString }).joined(separator: " ")
         let outputFilePath = context.pluginWorkDirectoryURL.appending(component: "HTMLTagClass.swift").absoluteString
         
-        return [.buildCommand(displayName: "Generating the HTML tag classes...",
-                              executable: try context.tool(named: "htmltagclass-generator").url,
-                              arguments: [inputFilePaths, "--outputFile \(outputFilePath)"],
-                              environment: [:],
-                              inputFiles: inputFiles.map(\.url),
-                              outputFiles: [context.pluginWorkDirectoryURL.appending(component: "HTMLTagClass.swift")])]
+        return [.prebuildCommand(displayName: "Generating the HTML tag classes...",
+                                 executable: try context.tool(named: "htmltagclass-generator").url,
+                                 arguments: [inputFilePaths, "--outputFile \(outputFilePath)"],
+                                 environment: [:],
+                                 outputFilesDirectory: context.pluginWorkDirectoryURL)]
+//        return [.buildCommand(displayName: "Generating the HTML tag classes...",
+//                              executable: try context.tool(named: "htmltagclass-generator").url,
+//                              arguments: [inputFilePaths, "--outputFile \(outputFilePath)"],
+//                              environment: [:],
+//                              inputFiles: inputFiles.map(\.url),
+//                              outputFiles: [context.pluginWorkDirectoryURL.appending(component: "HTMLTagClass.swift")])]
     }
 }
