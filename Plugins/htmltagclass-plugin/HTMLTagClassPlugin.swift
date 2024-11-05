@@ -30,7 +30,7 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
         
         return [.prebuildCommand(displayName: "Generating the HTML tag classes...",
                                  executable: try context.tool(named: "htmltagclass-generator").url,
-                                 arguments: [inputFilePaths, "--outputFile \(outputFilePath)"],
+                                 arguments: [" ", "--outputFile \(outputFilePath)"],
                                  environment: [:],
                                  outputFilesDirectory: context.pluginWorkDirectoryURL)]
 //        return [.buildCommand(displayName: "Generating the HTML tag classes...",
