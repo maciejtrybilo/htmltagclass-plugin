@@ -27,7 +27,7 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
         
         return [.buildCommand(displayName: "Generating the HTML tag classes...",
                               executable: try context.tool(named: "htmltagclass-generator").url,
-                              arguments: fileURLs.map(\.absoluteString) + ["--outputFile \(outputFilePath)"],
+                              arguments: fileURLs.map(\.absoluteString) + ["--output-file \(outputFilePath)"],
                               environment: [:],
                               inputFiles: fileURLs,
                               outputFiles: [URL(filePath: outputFilePath)])]
