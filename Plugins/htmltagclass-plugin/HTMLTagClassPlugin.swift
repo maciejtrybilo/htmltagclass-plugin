@@ -23,7 +23,7 @@ struct HTMLTagClassPlugin: CommandPlugin {
             
             let code = generateCode(classes: sortedClasses)
             
-            let outputFileURL = URL(fileURLWithPath: target.directory.string, isDirectory: true)
+            let outputFileURL = URL(fileURLWithPath: target.directory.string, isDirectory: false)
                 .appending(path: "Sources/App/HTMLTagClass.swift")
             
             try code.write(to: outputFileURL, atomically: true, encoding: .utf8)
