@@ -10,7 +10,7 @@ struct HTMLTagClassPlugin: CommandPlugin {
         let targetNames = argExtractor.extractOption(named: "target")
         let targets = targetNames.isEmpty ? context.package.targets : try context.package.targets(named: targetNames)
         
-        for target in targets {
+        for target in targets where target.name == "App" {
             
             let cssDirectoryURL = URL(fileURLWithPath: target.directory.string, isDirectory: true)
                 .deletingLastPathComponent()
@@ -23,7 +23,7 @@ struct HTMLTagClassPlugin: CommandPlugin {
             
             let code = generateCode(classes: sortedClasses)
             
-            let outputFileURL = URL(fileURLWithPath: target.directory.string, isDirectory: false)
+            let outputFileURL = URL(fileURLWithPath: target.directory.string, isDirectory: true)
                 .appending(path: "Sources/App/HTMLTagClass.swift")
             
             try code.write(to: outputFileURL, atomically: true, encoding: .utf8)
