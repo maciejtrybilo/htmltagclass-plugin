@@ -14,16 +14,12 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/maciejtrybilo/htmltagclass-generator",
-                 branch: "main")
     ],
     targets: [
-        .plugin(
-            name: "htmltagclass-plugin",
-            capability: .buildTool(),
-            dependencies: [
-                .product(name: "htmltagclass-generator", package: "htmltagclass-generator"),
-            ]
-        )
+        .plugin(name: "htmltagclass-plugin",
+                capability:
+                .command(intent: .custom(verb: "sourceCodeGeneration",
+                                         description: "Generate an enum containing all css classes defined in css files in the Public/css directory."),
+                         permissions: [.writeToPackageDirectory(reason: "Need the ability to save the generated enum.")]))
     ]
 )
