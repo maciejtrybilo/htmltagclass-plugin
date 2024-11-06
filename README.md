@@ -29,7 +29,7 @@ Add the package as a dependency to your project.
 ```
 let package = Package(
     dependencies: [
-        .package(url: "https://github.com/maciejtrybilo/htmltagclass-plugin.git", branch: "main")
+        .package(url: "https://github.com/maciejtrybilo/htmltagclass-plugin.git", from: "0.1.0")
     ],
     targets: [
         .executableTarget(
