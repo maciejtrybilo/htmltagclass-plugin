@@ -47,7 +47,7 @@ Launch the command to generate the code:
 > swift package plugin generateHTMLTagClass --allow-writing-to-package-directory
 ```
 
-You can also use entr to regenerate the code automatically every time a css file is saved, e.g.:
+You can also use [entr](https://github.com/eradman/entr) to regenerate the code automatically every time a css file is saved, e.g.:
 ```
 > find ./Public/css | grep '\.css$' | entr -r swift package plugin generateHTMLTagClass --allow-writing-to-package-directory
 ```
@@ -69,7 +69,7 @@ The plugin tries to massage some of the edge cases such as when the class name i
 .left-panel {}
 .switch {}
 ```
-will be result in:
+will result in:
 ```
 enum HTMLTagClass: String {
   case left_panel = "left-panel"
