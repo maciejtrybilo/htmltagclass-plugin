@@ -2,38 +2,150 @@ import PackagePlugin
 import Foundation
 
 @main
-struct HTMLTagClassPlugin: BuildToolPlugin {
+struct HTMLTagClassPlugin: CommandPlugin {
     
-    func createBuildCommands(context: PackagePlugin.PluginContext, target: any PackagePlugin.Target) async throws -> [PackagePlugin.Command] {
-        Diagnostics.remark("HTMLTagClassGenerator starting")
-        guard let target = target.sourceModule else { return [] }
+    func performCommand(context: PluginContext, arguments: [String]) async throws {
         
-        Diagnostics.remark("current directory \(context.pluginWorkDirectoryURL.absoluteString)")
+        var argExtractor = ArgumentExtractor(arguments)
+        let targetNames = argExtractor.extractOption(named: "target")
+        let targets = targetNames.isEmpty ? context.package.targets : try context.package.targets(named: targetNames)
         
-        let cssDirectory = URL(fileURLWithPath: target.directory.string, isDirectory: true)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .appending(component: "Public")
-            .appending(path: "css")
+        for target in targets {
+            
+            let cssDirectoryURL = URL(fileURLWithPath: target.directory.string, isDirectory: true)
+                .deletingLastPathComponent()
+                .deletingLastPathComponent()
+                .appending(path: "Public/css")
+            
+            let fileURLs = try cssFileURLs(directory: cssDirectoryURL)
+            
+            let sortedClasses = try parse(fileURLs: fileURLs).sorted()
+            
+            let code = generateCode(classes: sortedClasses)
+            
+            let outputFileURL = URL(fileURLWithPath: target.directory.string, isDirectory: true)
+                .appending(path: "Sources/App/HTMLTagClass.swift")
+            
+            try code.write(to: outputFileURL, atomically: true, encoding: .utf8)
+        }
+    }
+}
+
+private extension HTMLTagClassPlugin {
+    
+    func generateCode(classes: [String]) -> String {
+        var cases = [String]()
+
+        for cssClass in classes {
+            if cssClass.contains("-") {
+                cases += [#"    case \#(cssClass.replacing("-", with: "_")) = "\#(cssClass)""#]
+            } else if ["switch"].contains(cssClass) {
+                cases += [#"    case `\#(cssClass)`"#]
+            } else {
+                cases += [#"    case \#(cssClass)"#]
+            }
+        }
+
+        let code =
+        #"""
+        // Generated code, don't edit.
+
+        enum HTMLTagClass: String {
+        \#(cases.joined(separator: "\n"))
+        }
+
+        """#
         
-        let fileURLs = try cssFileURLs(directory: cssDirectory)
+        return code
+    }
+
+    func parse(fileURLs: [URL]) throws -> Set<String> {
         
-        Diagnostics.remark("css file urls \(fileURLs.count)")
+        var classes = Set<String>()
+
         for fileURL in fileURLs {
-            Diagnostics.remark("url: \(fileURL.path())")
+            
+            let contents = try String(contentsOfFile: fileURL.path(), encoding: .utf8)
+            
+            enum State {
+                case inClass
+                case outsideBody
+                case insideBody
+            }
+            
+            var state = State.outsideBody
+            var currentClass = ""
+            
+            for character in contents {
+                switch character {
+                case ".":
+                    switch state {
+                    case .inClass:
+                        if !currentClass.isEmpty {
+                            classes.insert(currentClass)
+                            currentClass = ""
+                        }
+                    case .outsideBody:
+                        state = .inClass
+                    case .insideBody:
+                        break
+                    }
+                case "{":
+                    switch state {
+                    case .inClass:
+                        if !currentClass.isEmpty {
+                            classes.insert(currentClass)
+                            currentClass = ""
+                        }
+                        state = .insideBody
+                    case .insideBody: // well, not handled too well
+                        break
+                    case .outsideBody:
+                        state = .insideBody
+                    }
+                case "}":
+                    switch state {
+                    case .inClass:
+                        if !currentClass.isEmpty {
+                            classes.insert(currentClass)
+                            currentClass = ""
+                        }
+                        state = .outsideBody
+                    case .outsideBody:
+                        break
+                    case .insideBody:
+                        state = .outsideBody
+                    }
+                case " ", "\t", "\n", ":":
+                    switch state {
+                    case .inClass:
+                        if !currentClass.isEmpty {
+                            classes.insert(currentClass)
+                            currentClass = ""
+                        }
+                        state = .outsideBody
+                    case .outsideBody:
+                        break
+                    case .insideBody:
+                        break
+                    }
+                default:
+                    switch state {
+                    case .inClass:
+                        currentClass += String(character)
+                    case .outsideBody:
+                        break
+                    case .insideBody:
+                        break
+                    }
+                }
+            }
         }
         
-        let outputFilePath = target.directory.appending(subpath: "HTMLTagClass.swift").string
-                
-        return [.buildCommand(displayName: "Generating the HTML tag classes...",
-                              executable: try context.tool(named: "htmltagclass-generator").url,
-                              arguments: fileURLs.map({ $0.path() }) + ["--output-file", outputFilePath],
-                              environment: [:],
-                              inputFiles: fileURLs,
-                              outputFiles: [URL(filePath: outputFilePath)])]
+        return classes
     }
-    
-    private func cssFileURLs(directory: URL) throws -> [URL] {
+
+    func cssFileURLs(directory: URL) throws -> [URL] {
         
         let items = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.isDirectoryKey])
         
@@ -43,7 +155,6 @@ struct HTMLTagClassPlugin: BuildToolPlugin {
             if try item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory ?? false {
                 files += try cssFileURLs(directory: item)
             } else {
-                Diagnostics.remark("Checking file \(item.absoluteString) \(item.pathExtension)")
                 if item.pathExtension == "css" {
                     files += [item]
                 }
