@@ -31,16 +31,10 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/maciejtrybilo/htmltagclass-plugin.git", from: "0.1.0")
     ],
-    targets: [
-        .executableTarget(
-            name: "App",
-            dependencies: [
-                .product(name: "HTMLTagClassPlugin", package: "htmltagclass-plugin")
-            ]
-        )
-    ]
 )
 ```
+
+Note: You only should add it as a package dependency, not anywhere under `targets`.
 
 Launch the command to generate the code:
 ```shell
