@@ -1,6 +1,14 @@
 import PackagePlugin
 import Foundation
 
+enum HTMLTagClassPluginError: Error {
+    case noTargetSpecified
+    
+    var localizedDescription: String {
+        "No target specified. Specify target(s) using the --target option."
+    }
+}
+
 @main
 struct HTMLTagClassPlugin: CommandPlugin {
     
@@ -8,9 +16,14 @@ struct HTMLTagClassPlugin: CommandPlugin {
         
         var argExtractor = ArgumentExtractor(arguments)
         let targetNames = argExtractor.extractOption(named: "target")
+        
+        guard !targetNames.isEmpty else {
+            throw HTMLTagClassPluginError.noTargetSpecified
+        }
+        
         let targets = targetNames.isEmpty ? context.package.targets : try context.package.targets(named: targetNames)
         
-        for target in targets where target.name == "App" {
+        for target in targets {
             
             let cssDirectoryURL = URL(fileURLWithPath: target.directory.string, isDirectory: true)
                 .deletingLastPathComponent()

@@ -34,22 +34,22 @@ let package = Package(
 )
 ```
 
-Note: You only should add it as a package dependency, not anywhere under `targets`.
+Note: You only should add it as a package dependency, not anywhere under `targets`.x
 
 Launch the command to generate the code:
 ```shell
-❯ swift package plugin generateHTMLTagClass --allow-writing-to-package-directory
+❯ swift package plugin generateHTMLTagClass --target <MyAppTarget> --allow-writing-to-package-directory
 ```
 
 You can also use [entr](https://github.com/eradman/entr) to regenerate the code automatically every time a css file is saved, e.g.:
 ```shell
-❯ find ./Public/css | grep '\.css$' | entr -r swift package plugin generateHTMLTagClass --allow-writing-to-package-directory
+❯ find ./Public/css | grep '\.css$' | entr -r swift package plugin generateHTMLTagClass --target <MyAppTarget> --allow-writing-to-package-directory
 ```
 
 ## How does it work?
 
 The plugin looks into the `Public/css` directory and all of its subdirectories and tries to parse out all classes that are referred to in the css files. 
-Then it creates the `HTMLTagClass.swift` file in the Sources/App directory containing the `HTMLTagClass` enum e.g.:
+Then it creates the `HTMLTagClass.swift` file in the Sources/<MyAppTarget> directory containing the `HTMLTagClass` enum e.g.:
 ```swift
 enum HTMLTagClass: String {
   case slider
